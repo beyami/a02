@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
@@ -12,9 +12,12 @@ spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route("/", methods=["GET", "POST"])
+def search():
+    if request.method == "POST":
+        return redirect("/suggest", 307)
+    else:
+        return render_template('index.html')
 
 # 検索候補を表示するページ
 @app.route('/suggest', methods=['POST'])
