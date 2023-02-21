@@ -12,11 +12,15 @@ spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 app = Flask(__name__)
 
+# トップページ
 @app.route("/", methods=["GET", "POST"])
 def search():
     if request.method == "POST":
+        # 入力内容を取得したらステータスコード307で/suggestへリダイレクト
+        # ↑不通にリダイレクトするとGETに切り替えられてしまうため
         return redirect("/suggest", 307)
     else:
+        # GETならフォームを表示、検索内容取得
         return render_template('index.html')
 
 # 検索候補を表示するページ
