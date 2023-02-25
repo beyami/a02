@@ -6,11 +6,6 @@
   </head>
   <body>
     <h1>Spotify Song Info</h1>
-    <form method="POST">
-      <label for="song_id">Enter a Spotify song ID:</label>
-      <input type="text" name="song_id" id="song_id" required>
-      <button type="submit">Submit</button>
-    </form>
     {% if song_info %}
       <h2>{{ song_info['name'] }}</h2>
       <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200">
@@ -92,3 +87,4 @@
     {% endif %}
   </body>
 </html>
+
