@@ -16,10 +16,10 @@ app = Flask(__name__)
 def search():
     # "POST"なら検索結果表示
     if request.method == "POST":
-        # '/' のフォーム内容を取得
+        # フォーム内容取得
         song_name = str(request.form.get('song_name'))
 
-        # '/' のフォーム内容が与えられていない場合の処理
+        # フォーム内容が与えられていない場合の処理
         if song_name == None:
             song_name = ''
 
