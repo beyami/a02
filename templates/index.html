@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Search</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div class="header">
-            <h1>Search</h1>
-        </div>
-        <div class="container">
-            <div class="section">
-
-                <h2>Search music</h2>
-                <form action="/" method="post">
-                    <input name="song_name" placeholder="Music Name" type="text">
-                    <input type="submit" value="Search">
-                </form>
-            </div>
-        </div>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>曲検索</title>
+</head>
+<body>
+    <h1>曲検索</h1>
+    <form method="POST" action="/">
+        <label for="song_name">曲名：</label>
+        <input type="text" name="song_name" id="song_name">
+        <br>
+        <input type="submit" value="検索">
+    </form>
+</body>
 </html>
