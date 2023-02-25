@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>曲検索</title>
-</head>
-<body>
-    <h1>曲検索</h1>
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}曲検索{%endblock%}
+{% endblock %}
+
+{% block content%}
     <form method="POST" action="/">
-        <label for="song_name">曲名：</label>
-        <input type="text" name="song_name" id="song_name">
-        <br>
-        <input type="submit" value="検索">
+        <div class="mx-auto w-75">
+            <label for="song_name" class="form-label">曲名：</label>
+            <input type="text" name="song_name" id="song_name" class="form-control">
+            <input type="submit" value="検索" class="btn btn-primary my-2">
+        </div>
     </form>
-</body>
-</html>
+{% endblock %}
