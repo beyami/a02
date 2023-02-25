@@ -5,8 +5,8 @@ import json
 app = Flask(__name__)
 
 # Spotify APIの認証情報
-client_id = "YOUR_ID"
-client_secret = "YOUR_SECRET"
+client_id = "d68aa5698ed14e3a8796101d4e622000"
+client_secret = "caa360cbc1ad483282e4e37a4a35223e"
 token_url = "https://accounts.spotify.com/api/token"
 search_url = "https://api.spotify.com/v1/search"
 
@@ -50,6 +50,8 @@ def search_songs(query):
 
     return songs
 
+access_token = get_access_token()
+
 # トップページ
 @app.route("/", methods=["GET", "POST"])
 def search():
@@ -69,3 +71,64 @@ def search():
     else:
         # GETならフォームを表示、検索内容取得
         return render_template('index.html')
+
+#resultに関するページなど
+@app.route('/result', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        song_id = request.form['song_id']
+        song_info = get_song_info(song_id)
+
+        #ジャンルが複数ある場合にカンマ区切りで格納する
+        genres_str = ", ".join(song_info['genres'])
+        song_info['genres'] = genres_str
+        return render_template('result.html', song_info=song_info)
+    return render_template('result.html')
+
+#アーティストのジャンルを取得
+def get_artist_genres(artist_id):
+    url = f"https://api.spotify.com/v1/artists/{artist_id}"
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        artist_info = json.loads(response.text)
+        genres = artist_info.get('genres', [])
+        return genres
+    else:
+        return []
+
+#楽曲の情報の取得
+def get_song_info(song_id):
+    url = f"https://api.spotify.com/v1/tracks/{song_id}"
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        song_info = json.loads(response.text)
+        # アーティスト情報からジャンル情報を取得して曲情報に追加する
+        artist_id = song_info.get('artists', [{}])[0].get('id', '')
+        genres = get_artist_genres(artist_id)
+        song_info['genres'] = genres
+        # オーディオフィーチャー情報を取得して曲情報に追加する
+        audio_features = get_audio_features(song_id)
+        if audio_features:
+            song_info['audio_features'] = audio_features
+        return song_info
+    else:
+        return None
+
+#オーディオフィーチャーの取得
+def get_audio_features(song_id):
+    url = f"https://api.spotify.com/v1/audio-features/{song_id}"
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        audio_features = json.loads(response.text)
+        return audio_features
+    else:
+        return None
