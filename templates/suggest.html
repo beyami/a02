@@ -1,15 +1,30 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Suggestion</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <form action="/suggest" method="post">
+<head>
+    <meta charset="UTF-8">
+    <title>曲検索結果</title>
+</head>
+<body>
+    <h1>曲検索結果</h1>
+    {% if songs %}
+        <ul>
             {% for song in songs %}
-                <button name="spotify_id" value="{{ song['id'] }}">{{ song['name'] }} - {{song['artist'] }}</button>
+            <li>
+                <div class="song">
+                    <span class="name">{{ song.name }}</span>
+                    <span class="artist">{{ song.artist }}</span>
+                    <form method="POST" action="/result">
+                        <input type="hidden" name="song_id" value="{{ song.id }}">
+                        <button type="submit">詳細を見る</button>
+                    </form>
+                </div>
+            </li>
             {% endfor %}
-        </form>
-    </body>
+        </ul>
+    {% else %}
+        <p>曲が見つかりませんでした。</p>
+    {% endif %}
+    <br>
+    <a href="/">戻る</a>
+</body>
 </html>
