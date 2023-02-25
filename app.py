@@ -5,8 +5,8 @@ import json
 app = Flask(__name__)
 
 # Spotify APIの認証情報
-client_id = "d68aa5698ed14e3a8796101d4e622000"
-client_secret = "caa360cbc1ad483282e4e37a4a35223e"
+client_id = "YOUR_ID"
+client_secret = "YOUR_SECRET"
 token_url = "https://accounts.spotify.com/api/token"
 search_url = "https://api.spotify.com/v1/search"
 
