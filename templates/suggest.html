@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block header %}
-    {% block title %}曲検索結果{%endblock%}
+    {% block title %}Suggestions{%endblock%}
 {% endblock %}
 
 {% block content %}
@@ -13,13 +13,13 @@
                     <h6 class="artist card-subtitle">{{ song.artist }}</h6>
                     <form method="POST" action="/result">
                         <input type="hidden" name="song_id" value="{{ song.id }}">
-                        <button type="submit" class="btn btn-primary mt-2">詳細を見る</button>
+                        <button type="submit" class="btn btn-primary mt-2">Details</button>
                     </form>
                 </div>
             </div>
         {% endfor %}
     {% else %}
-        <p class="alert alert-primary" role="alert">曲が見つかりませんでした。</p>
+        <p class="alert alert-primary" role="alert">No music was found.</p>
     {% endif %}
-        <a href="/" class="btn btn-secondary mt-2">戻る</a>
+        <a href="/" class="btn btn-secondary mt-2">Return</a>
 {% endblock %}

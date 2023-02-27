@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block header %}
-    {% block title %}曲検索{%endblock%}
+    {% block title %}Search Songs{%endblock%}
 {% endblock %}
 
 {% block content%}
     <form method="POST" action="/">
-        <label for="song_name" class="form-label">曲名：</label>
+        <label for="song_name" class="form-label">Song Name</label>
         <input type="text" name="song_name" id="song_name" class="form-control">
-        <input type="submit" value="検索" class="btn btn-primary my-2">
+        <input type="submit" value="Search" class="btn btn-primary my-2">
     </form>
 {% endblock %}

@@ -1,22 +1,24 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Spotify Song Info</title>
-  </head>
-  <body>
-    <h1>Spotify Song Info</h1>
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}Spotify Song Info{%endblock%}
+{% endblock %}
+{% block content%}
     {% if song_info %}
-      <h2>{{ song_info['name'] }}</h2>
-      <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200">
-      <br>
-      <tr>
-        <td>Artists:</td>
-        {% for artist in song_info['artists'] %}
-          <td>{{ artist['name'] }} </td>
-        {% endfor %}
-      </tr>
-      <table>
+      <div class="card">
+        <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200px">
+        <div class="card-body">
+          <h5 class="card-title">{{ song_info['name'] }}</h5>
+          <ul class="list-group">
+            <li class="list-group-item active">Artists</li>
+            {% for artist in song_info['artists'] %}
+              <li class="list-group-item">{{ artist['name'] }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <table class="table table-bordered mt-2">
         <tr>
           <td>Genre:</td>
           <td>{{ song_info['genres'] }}</td>
@@ -85,6 +87,6 @@
         {% endif %}
       </table>
     {% endif %}
-  </body>
-</html>
+    <a href="/" class="btn btn-secondary">Return</a>
+{% endblock %}
 
