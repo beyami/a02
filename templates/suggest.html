@@ -1,30 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>曲検索結果</title>
-</head>
-<body>
-    <h1>曲検索結果</h1>
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}曲検索結果{%endblock%}
+{% endblock %}
+
+{% block content %}
     {% if songs %}
-        <ul>
-            {% for song in songs %}
-            <li>
-                <div class="song">
-                    <span class="name">{{ song.name }}</span>
-                    <span class="artist">{{ song.artist }}</span>
+        {% for song in songs %}
+            <div class="song card mt-2">
+                <div class="card-body">
+                    <h5 class="name card-title">{{ song.name }}</h5>
+                    <h6 class="artist card-subtitle">{{ song.artist }}</h6>
                     <form method="POST" action="/result">
                         <input type="hidden" name="song_id" value="{{ song.id }}">
-                        <button type="submit">詳細を見る</button>
+                        <button type="submit" class="btn btn-primary mt-2">詳細を見る</button>
                     </form>
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
+            </div>
+        {% endfor %}
     {% else %}
-        <p>曲が見つかりませんでした。</p>
+        <p class="alert alert-primary" role="alert">曲が見つかりませんでした。</p>
     {% endif %}
-    <br>
-    <a href="/">戻る</a>
-</body>
-</html>
+        <a href="/" class="btn btn-secondary mt-2">戻る</a>
+{% endblock %}

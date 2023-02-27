@@ -8,6 +8,9 @@
     </head>
     <section class="content">
         <header><h1>{% block header %}{% endblock %}</h1></header>
-        {% block content %}{% endblock %}
+        <div class="mx-auto mt-4 w-75">
+            {% block content %}
+            {% endblock %}
+        </div>
     </section>
 </html>
