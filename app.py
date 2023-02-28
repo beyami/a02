@@ -12,6 +12,10 @@ search_url = "https://api.spotify.com/v1/search"
 
 # 認証トークンを取得する関数
 def get_access_token():
+    #入力がない場合、空白文字列の場合
+    if not query or not query.strip():
+        return []
+
     # POSTリクエストで認証トークンを取得する
     auth_response = requests.post(token_url, {
         'grant_type': 'client_credentials',
@@ -25,6 +29,10 @@ def get_access_token():
 
 # 楽曲検索を行う関数
 def search_songs(query):
+    #入力がない場合、空白文字列の場合
+    if not query or not query.strip():
+        return []
+
     # 認証トークンを取得
     access_token = get_access_token()
 
