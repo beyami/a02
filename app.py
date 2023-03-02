@@ -139,6 +139,7 @@ def get_audio_features(song_id):
     else:
         return None
 
+
 #以下すべてプロトタイプ
 
 # 各種データをもとに、おすすめの音楽をSpotifyから取得する関数
@@ -177,7 +178,7 @@ def get_recommendations(audio_features):
     response_data = response.json()
     return response_data
 
-# idを比較して、同じ曲じゃなければTrueを返す
+# idやそれに紐づいた名前を比較して、同じ曲じゃなければTrueを返す
 def check_not_the_same(source_id, result_id):
     if source_id == result_id:
         return False
@@ -188,13 +189,20 @@ def check_not_the_same(source_id, result_id):
 # 類似する音楽を表示（実験的）
 @app.route('/experiment', methods=['POST'])
 def experiment():
+    # '/'から送信された'song_id'を用いて、audio_featuresを取得
     audio_features = get_audio_features(request.form.get('song_id'))
+    # Spotifyからおすすめの音楽を取得
     recommendations = get_recommendations(audio_features)['tracks']
+    おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
+    # 同じ曲がおすすめされた場合にそれを弾く処理
     for rec in recommendations:
         if check_not_the_same(request.form.get('song_id'), rec['id']):
             result_id = rec['id']
             break
+    # ユーザーが検索に使った楽曲の情報を取得
     source_song_info = get_song_info(request.form.get('song_id'))
+    # おすすめされた楽曲の情報を取得
     result_song_info = get_song_info(result_id)
+    #'experiment.html'に各種情報を送信
     return render_template('experiment.html', source_song_info=source_song_info, result_song_info=result_song_info)
