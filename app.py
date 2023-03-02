@@ -5,16 +5,13 @@ import json
 app = Flask(__name__)
 
 # Spotify APIの認証情報
-client_id = "YOUR_ID"
-client_secret = "YOUR_SECRET"
+client_id = ""
+client_secret = ""
 token_url = "https://accounts.spotify.com/api/token"
 search_url = "https://api.spotify.com/v1/search"
 
 # 認証トークンを取得する関数
 def get_access_token():
-    #入力がない場合、空白文字列の場合
-    if not query or not query.strip():
-        return []
 
     # POSTリクエストで認証トークンを取得する
     auth_response = requests.post(token_url, {
@@ -41,6 +38,7 @@ def search_songs(query):
         'q': query,
         'type': 'track',
         'limit': 5,
+        'market': 'JP'
     }, headers={
         'Authorization': 'Bearer ' + access_token
     })
@@ -140,3 +138,63 @@ def get_audio_features(song_id):
         return audio_features
     else:
         return None
+
+#以下すべてプロトタイプ
+
+# 各種データをもとに、おすすめの音楽をSpotifyから取得する関数
+recommendations_url = 'https://api.spotify.com/v1/recommendations'
+# Audio Featuresの結果を受け取り、それをもとにお勧めの音楽を取得する関数
+def get_recommendations(audio_features):
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    # 検索パラメータ
+    targets = {
+        'seed_tracks':              audio_features.get('id'),
+        'market':                   'JP',
+        'limit':                    10,
+        'target_acousticness':      audio_features.get('acousticness'),
+        'target_danceability':      audio_features.get('danceability'),
+        'target_energy':            audio_features.get('energy'),
+        'target_instrumentalness':  audio_features.get('instrumentalness'),
+        'target_key':               audio_features.get('key'),
+        'target_liveness':          audio_features.get('liveness'),
+        'target_loudness':          audio_features.get('loudness'),
+        'target_mode':              audio_features.get('mode'),
+        'target_speechiness':       audio_features.get('speechiness'),
+        'target_tempo':             audio_features.get('tempo'),
+        'target_valence':           audio_features.get('valence')
+    }
+
+
+    # GETリクエストでおすすめの楽曲を取得する
+    response = requests.get(recommendations_url, params=targets, headers={
+        'Authorization': 'Bearer ' + access_token
+    })
+
+    # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
+    response_data = response.json()
+    return response_data
+
+# idを比較して、同じ曲じゃなければTrueを返す
+def check_not_the_same(source_id, result_id):
+    if source_id == result_id:
+        return False
+    elif get_song_info(source_id)['name'] == get_song_info(result_id)['name']:
+        return False
+    return True
+
+# 類似する音楽を表示（実験的）
+@app.route('/experiment', methods=['POST'])
+def experiment():
+    audio_features = get_audio_features(request.form.get('song_id'))
+    recommendations = get_recommendations(audio_features)['tracks']
+    result_id = ""
+    for rec in recommendations:
+        if check_not_the_same(request.form.get('song_id'), rec['id']):
+            result_id = rec['id']
+            break
+    source_song_info = get_song_info(request.form.get('song_id'))
+    result_song_info = get_song_info(result_id)
+    return render_template('experiment.html', source_song_info=source_song_info, result_song_info=result_song_info)

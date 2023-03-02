@@ -15,6 +15,10 @@
                         <input type="hidden" name="song_id" value="{{ song.id }}">
                         <button type="submit" class="btn btn-primary mt-2">Details</button>
                     </form>
+                    <form method="POST" action="/experiment">
+                        <input type="hidden" name="song_id" value="{{ song.id }}">
+                        <button type="submit" class="btn btn-secondary mt-2">Experiment</button>
+                    </form>
                 </div>
             </div>
         {% endfor %}
