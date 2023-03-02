@@ -193,7 +193,7 @@ def experiment():
     audio_features = get_audio_features(request.form.get('song_id'))
     # Spotifyからおすすめの音楽を取得
     recommendations = get_recommendations(audio_features)['tracks']
-    おすすめされた音楽のidを保存するする変数の初期化
+    # おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
     # 同じ曲がおすすめされた場合にそれを弾く処理
     for rec in recommendations:
