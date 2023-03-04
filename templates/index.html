@@ -5,9 +5,26 @@
 {% endblock %}
 
 {% block content%}
-    <form method="POST" action="/">
-        <label for="song_name" class="form-label">Song Name</label>
-        <input type="text" name="song_name" id="song_name" class="form-control">
-        <input type="submit" value="Search" class="btn btn-primary my-2">
-    </form>
+    <div>
+        <form method="POST" action="/">
+            <label for="song_name" class="form-label">Song Name</label>
+            <input type="text" name="song_name" id="song_name" class="form-control">
+            <input type="submit" value="Search" class="btn btn-primary my-2">
+        </form>
+    </div>
+    <div>
+        <div class="d-flex flex-column">
+            <form method="POST" action="/random">
+                <div>
+                    <button name="song_type" value="happy" class="btn btn-light mt-2">Give me some happy songs!</button>
+                    <button name="song_type" value="sad" class="btn btn-dark mt-2">Give me some sad songs!</button>
+                </div>
+                <div>
+                    <button name="song_type" value="intense" class="btn btn-danger mt-2">Give me some intense songs!</button>
+                    <button name="song_type" value="intense" class="btn btn-info mt-2">Give me some calm songs!</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 {% endblock %}
