@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block content%}
-    <div>
+    <div class="border border-1 rounded-3 p-2">
+        <h3>Song Search</h3>
         <form method="POST" action="/">
             <label for="song_name" class="form-label">Song Name</label>
             <input type="text" name="song_name" id="song_name" class="form-control">
@@ -13,7 +14,8 @@
         </form>
     </div>
     <div>
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column border border-1 rounded-3 p-2 mt-4">
+            <h3>Random Search</h3>
             <form method="POST" action="/random">
                 <div>
                     <button name="song_type" value="happy" class="btn btn-light mt-2">Give me some happy songs!</button>
@@ -21,7 +23,17 @@
                 </div>
                 <div>
                     <button name="song_type" value="intense" class="btn btn-danger mt-2">Give me some intense songs!</button>
-                    <button name="song_type" value="intense" class="btn btn-info mt-2">Give me some calm songs!</button>
+                    <button name="song_type" value="calm" class="btn btn-info mt-2">Give me some calm songs!</button>
+                </div>
+                <div class="w-25 mt-2">
+                    <label for="popularity" class="form-label">Popularity</label>
+                    <input type="range" class="form-range" name="popularity" id="popularity" min="0" max="100" value="100" step="5">
+                    <label for="genre" class="form-label">Genres</label>
+                    <select class="form-select" name="genre" size="10" aria-label="size 3 select example">
+                        {% for genre in genres %}
+                            <option value={{ genre }}>{{ genre }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </form>
         </div>

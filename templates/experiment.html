@@ -28,6 +28,7 @@
                     </div>
                 {% endif %}
             {% endfor %}
+            <a href={{ source_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
         </div>
         <div class="card w-25 mx-1">
             <img src={{ result_song_info['album']['images'][0]['url'] }} class="card-img-top">
@@ -51,6 +52,8 @@
                     </div>
                 {% endif %}
             {% endfor %}
+            <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
         </div>
     </div>
+    <a href="/" class="btn btn-secondary ms-1 mt-2">Return</a>
 {% endblock %}

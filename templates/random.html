@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}Random Search{%endblock%}
+{% endblock %}
+
+{% block content%}
+    <div class="row row-cols-2 row-cols-md-5">
+        {% for rec in recommendations['tracks'] %}
+            <div class="col">
+                <div class="card">
+                    <img src={{ rec['album']['images'][0]['url'] }} width="200" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ rec['name'] }}</h5>
+                        <div class="card-header mt-1">
+                            Artists
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for artist in rec['artists'] %}
+                                <li class="list-group-item">{{ artist['name'] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <a href={{ rec['external_urls']['spotify'] }} class="btn btn-primary mt-2 mb-3" target="_blank">Listen on Spotify</a>
+            </div>
+        {% endfor %}
+    </div>
+    <a href='/' class="btn btn-secondary mt-2" >Return</a>
+{% endblock %}

@@ -6,7 +6,7 @@
 {% block content%}
     {% if song_info %}
       <div class="card">
-        <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200px">
+        <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200px" class="mt-1 ms-1">
         <div class="card-body">
           <h5 class="card-title">{{ song_info['name'] }}</h5>
           <ul class="list-group">
