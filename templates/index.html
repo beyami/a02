@@ -9,7 +9,7 @@
         <h3>Song Search</h3>
         <form method="POST" action="/">
             <label for="song_name" class="form-label">Song Name</label>
-            <input type="text" name="song_name" id="song_name" class="form-control">
+            <input type="text" name="song_name" id="song_name" class="form-control" autofocus autocomplete="off">
             <input type="submit" value="Search" class="btn btn-primary my-2">
         </form>
     </div>
@@ -17,23 +17,31 @@
         <div class="d-flex flex-column border border-1 rounded-3 p-2 mt-4">
             <h3>Random Search</h3>
             <form method="POST" action="/random">
-                <div>
-                    <button name="song_type" value="happy" class="btn btn-light mt-2">Give me some happy songs!</button>
-                    <button name="song_type" value="sad" class="btn btn-dark mt-2">Give me some sad songs!</button>
-                </div>
-                <div>
-                    <button name="song_type" value="intense" class="btn btn-danger mt-2">Give me some intense songs!</button>
-                    <button name="song_type" value="calm" class="btn btn-info mt-2">Give me some calm songs!</button>
-                </div>
-                <div class="w-25 mt-2">
-                    <label for="popularity" class="form-label">Popularity</label>
-                    <input type="range" class="form-range" name="popularity" id="popularity" min="0" max="100" value="100" step="5">
+                <div class="w-50 mt-2">
+                    <div>
+                        <label for="popularity" class="form-label">Popularity</label>
+                        <div class="d-flex">
+                            <span>Low</span>
+                            <input type="range" class="form-range mx-2" name="popularity" id="popularity" min="0" max="100" value="100" step="5">
+                            <span>High</span>
+                        </div>
+                    </div>
                     <label for="genre" class="form-label">Genres</label>
-                    <select class="form-select" name="genre" size="10" aria-label="size 3 select example">
+                    <select class="form-select mb-1" name="genre" size="10" aria-label="size 3 select example">
                         {% for genre in genres %}
                             <option value={{ genre }}>{{ genre }}</option>
                         {% endfor %}
                     </select>
+                    <div class="container">
+                        <div class="row">
+                            <button name="song_type" value="happy" class="btn btn-light col m-1">Give me some happy songs!</button>
+                            <button name="song_type" value="sad" class="btn btn-dark col m-1">Give me some sad songs!</button>
+                        </div>
+                        <div class="row">
+                            <button name="song_type" value="intense" class="btn btn-danger col m-1">Give me some intense songs!</button>
+                            <button name="song_type" value="calm" class="btn btn-info col m-1">Give me some calm songs!</button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

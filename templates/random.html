@@ -26,5 +26,17 @@
             </div>
         {% endfor %}
     </div>
+    <div class="w-50">
+        <form action="/ranking" method="post">
+            <input type="hidden" name="song_type" value={{ song_type }}>
+            <label for="song-select">Vote your favorite song!</label>
+            <select name="vote" id="song-select" class="form-select">
+                {% for rec in recommendations['tracks'] %}
+                    <option value={{ rec['id'] }}>{{ rec['name'] }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary mt-1">Submit</button>
+        </form>
+    </div>
     <a href='/' class="btn btn-secondary mt-2" >Return</a>
 {% endblock %}

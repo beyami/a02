@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect
 import requests
 import json
 import random
+from cs50 import SQL
 
 app = Flask(__name__)
 
@@ -10,6 +11,9 @@ client_id = ""
 client_secret = ""
 token_url = "https://accounts.spotify.com/api/token"
 search_url = "https://api.spotify.com/v1/search"
+
+# データベースを開く
+db = SQL("sqlite:///votes.db")
 
 # 認証トークンを取得する関数
 def get_access_token():
@@ -129,7 +133,51 @@ def random_page():
         # おすすめの音楽を取得
         recommendations = get_recommendations(song_type=song_type, popularity=popularity, genre=genre)
         # ページを表示
-        return render_template('random.html', recommendations=recommendations)
+        return render_template('random.html', recommendations=recommendations, song_type=song_type)
+
+@app.route("/ranking", methods=['GET', 'POST'])
+def ranking():
+    # ランキング上位の曲に曲情報を追加する関数
+    def add_song_info(songs):
+        for song in songs:
+            song.update(get_song_info(song['track_id']))
+        return songs
+
+    if request.method == 'GET':
+        # 投票数上位10曲を取得し、曲情報を追加
+        happy_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'happy')
+        happy_songs = add_song_info(happy_songs)
+        sad_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'sad')
+        sad_songs = add_song_info(sad_songs)
+        intense_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'intense')
+        intense_songs = add_song_info(intense_songs)
+        calm_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'calm')
+        calm_songs = add_song_info(calm_songs)
+        # ページの描画
+        return render_template('ranking.html', happy_songs=happy_songs, sad_songs=sad_songs, intense_songs=intense_songs, calm_songs=calm_songs)
+
+    elif request.method == 'POST':
+        # フォームの入力内容を取得
+        # 投票されたsong_idが不正だった場合、'/ranking'にリダイレクト
+        # 英数字であれば、不正であっても影響は小さいので、チェックは簡易的です
+        track_id = request.form.get("vote")
+        if not track_id.isalnum():
+            return redirect('/ranking')
+        # song_typeが不正だった場合、投票を無効にして、'/ranking'にリダイレクト
+        song_type = request.form.get("song_type")
+        if song_type not in SONG_TYPES:
+            return redirect('/ranking')
+        # データベースを検索し、現在の投票数を取得
+        result = db.execute("SELECT vote_count FROM votes WHERE track_id = ? AND song_type = ?", track_id, song_type)
+
+        # 一度も投票されていない場合、カラムを作成
+        if not result:
+            db.execute("INSERT INTO votes VALUES(?, ?, 1)", track_id, song_type)
+        # データベースのvote_countを1加算する
+        else:
+            vote_count = result[0]['vote_count']
+            db.execute("UPDATE votes SET vote_count = ? WHERE track_id = ? AND song_type = ?", (vote_count + 1), track_id, song_type)
+        return redirect('/ranking')
 
 #アーティストのジャンルを取得
 def get_artist_genres(artist_id):
@@ -291,8 +339,6 @@ def get_recommendations(**kwargs):
             targets['target_energy'] = random.randint(75, 100) / 100
         elif song_type == 'calm':
             targets['target_energy'] = random.randint(0, 25) / 100
-
-    print(targets)
 
     #エラー処理
     #'seed_tracks'または'seed_genres'が指定されていない場合検索が行えないため
