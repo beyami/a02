@@ -5,54 +5,62 @@
 {% endblock %}
 
 {% block content%}
-    <div class="d-flex flex-row">
-        <div class="card w-25 mx-1">
-            <img src={{ source_song_info['album']['images'][0]['url'] }} class="card-img-top">
-            <div class="card-body">
-                <h5 class="card-title">{{ source_song_info['name'] }}</h5>
-                <ul class="list-group list-group">
-                    <li class="list-group-item active">Artists</li>
-                    {% for artist in source_song_info['artists'] %}
-                        <li class="list-group-item">{{ artist['name'] }}</li>
+    <div class="row">
+        <div class="col-12 col-xl-6">
+            <div class="d-flex">
+                <div class="card w-50 mx-1">
+                    <img src={{ source_song_info['album']['images'][0]['url'] }} class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ source_song_info['name'] }}</h5>
+                        <ul class="list-group list-group">
+                            <li class="list-group-item active">Artists</li>
+                            {% for artist in source_song_info['artists'] %}
+                                <li class="list-group-item">{{ artist['name'] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="w-50 mx-1">
+                    {% for key in source_song_info['audio_features'].keys() %}
+                        {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
+                            <span>{{ key }}</span>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ (source_song_info['audio_features'][key] * 100)|int }}%"
+                                    aria-valuenow="{{ (source_song_info['audio_features'][key] * 100)|int }}" aria-valuemin="0" aria-valuemax="100">{{ (source_song_info['audio_features'][key] * 100)|int }}</div>
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                </ul>
+                    <a href={{ source_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
+                </div>
             </div>
         </div>
-        <div class="w-25 mx-1">
-            {% for key in source_song_info['audio_features'].keys() %}
-                {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
-                    <span>{{ key }}</span>
-                    <div class="progress mb-2">
-                        <div class="progress-bar" role="progressbar" style="width: {{ (source_song_info['audio_features'][key] * 100)|int }}%"
-                             aria-valuenow="{{ (source_song_info['audio_features'][key] * 100)|int }}" aria-valuemin="0" aria-valuemax="100">{{ (source_song_info['audio_features'][key] * 100)|int }}</div>
+        <div class="col-12 col-xl-6">
+            <div class="d-flex mt-2">
+                <div class="card w-50 mx-1">
+                    <img src={{ result_song_info['album']['images'][0]['url'] }} class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ result_song_info['name'] }}</h5>
+                        <ul class="list-group list-group">
+                            <li class="list-group-item active">Artists</li>
+                            {% for artist in result_song_info['artists'] %}
+                                <li class="list-group-item">{{ artist['name'] }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                {% endif %}
-            {% endfor %}
-            <a href={{ source_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
-        </div>
-        <div class="card w-25 mx-1">
-            <img src={{ result_song_info['album']['images'][0]['url'] }} class="card-img-top">
-            <div class="card-body">
-                <h5 class="card-title">{{ result_song_info['name'] }}</h5>
-                <ul class="list-group list-group">
-                    <li class="list-group-item active">Artists</li>
-                    {% for artist in result_song_info['artists'] %}
-                        <li class="list-group-item">{{ artist['name'] }}</li>
+                </div>
+                <div class="w-50 mx-1">
+                    {% for key in result_song_info['audio_features'].keys() %}
+                        {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
+                            <span>{{ key }}</span>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ (result_song_info['audio_features'][key] * 100)|int }}%"
+                                    aria-valuenow="{{ (result_song_info['audio_features'][key] * 100)|int }}" aria-valuemin="0" aria-valuemax="100">{{ (result_song_info['audio_features'][key] * 100)|int }}</div>
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                </ul>
+                    <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
+                </div>
             </div>
-        </div>
-        <div class="w-25 mx-1">
-            {% for key in result_song_info['audio_features'].keys() %}
-                {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
-                    <span>{{ key }}</span>
-                    <div class="progress mb-2">
-                        <div class="progress-bar" role="progressbar" style="width: {{ (result_song_info['audio_features'][key] * 100)|int }}%"
-                             aria-valuenow="{{ (result_song_info['audio_features'][key] * 100)|int }}" aria-valuemin="0" aria-valuemax="100">{{ (result_song_info['audio_features'][key] * 100)|int }}</div>
-                    </div>
-                {% endif %}
-            {% endfor %}
-            <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
         </div>
     </div>
     <a href="/" class="btn btn-secondary ms-1 mt-2">Return</a>
