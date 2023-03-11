@@ -6,24 +6,28 @@
 
 {% block content %}
     {% if songs %}
+    <div class="row">
         {% for song in songs %}
-            <div class="song card mt-2">
-                <div class="card-body">
-                    <h5 class="name card-title">{{ song.name }}</h5>
-                    <h6 class="artist card-subtitle">{{ song.artist }}</h6>
-                    <form method="POST" action="/result">
-                        <input type="hidden" name="song_id" value="{{ song.id }}">
-                        <button type="submit" class="btn btn-primary mt-2">Details</button>
-                    </form>
-                    <form method="POST" action="/experiment">
-                        <input type="hidden" name="song_id" value="{{ song.id }}">
-                        <button type="submit" class="btn btn-secondary mt-2">Experiment</button>
-                    </form>
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="song card mt-2">
+                    <div class="card-body">
+                        <h5 class="name card-title">{{ song.name }}</h5>
+                        <h6 class="artist card-subtitle">{{ song.artist }}</h6>
+                        <form method="POST" action="/result">
+                            <input type="hidden" name="song_id" value="{{ song.id }}">
+                            <button type="submit" class="btn btn-primary mt-2">Details</button>
+                        </form>
+                        <form method="POST" action="/experiment">
+                            <input type="hidden" name="song_id" value="{{ song.id }}">
+                            <button type="submit" class="btn btn-secondary mt-2">Experiment</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         {% endfor %}
+    </div>
     {% else %}
         <p class="alert alert-primary" role="alert">No music was found.</p>
     {% endif %}
-        <a href="/" class="btn btn-secondary mt-2">Return</a>
+        <a href="/" class="btn btn-secondary my-2">Return</a>
 {% endblock %}
