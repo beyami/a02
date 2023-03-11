@@ -34,32 +34,40 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-xl-6">
-            <div class="d-flex mt-2">
-                <div class="card w-50 mx-1">
-                    <img src={{ result_song_info['album']['images'][0]['url'] }} class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ result_song_info['name'] }}</h5>
-                        <ul class="list-group list-group">
-                            <li class="list-group-item active">Artists</li>
-                            {% for artist in result_song_info['artists'] %}
-                                <li class="list-group-item">{{ artist['name'] }}</li>
-                            {% endfor %}
-                        </ul>
+        {% if result_song_info %}
+            <div class="col-12 col-xl-6">
+                <div class="d-flex mt-2">
+                    <div class="card w-50 mx-1">
+                        <img src={{ result_song_info['album']['images'][0]['url'] }} class="card-img-top">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ result_song_info['name'] }}</h5>
+                            <ul class="list-group list-group">
+                                <li class="list-group-item active">Artists</li>
+                                {% for artist in result_song_info['artists'] %}
+                                    <li class="list-group-item">{{ artist['name'] }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <div class="w-50 mx-1">
-                    {% for key in result_song_info['audio_features'].keys() %}
-                        {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
-                            <span>{{ key }}</span>
-                            <div class="progress mb-2">
-                                <div class="progress-bar" role="progressbar" style="width: {{ (result_song_info['audio_features'][key] * 100)|int }}%"
-                                    aria-valuenow="{{ (result_song_info['audio_features'][key] * 100)|int }}" aria-valuemin="0" aria-valuemax="100">{{ (result_song_info['audio_features'][key] * 100)|int }}</div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
-                </div>
+                    <form method="POST" action="/re_search" >
+                        <div class="w-25 mx-1">
+                            {% for key in result_song_info['audio_features'].keys() %}
+                                {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
+                                    <p>{{ key }}: <span class="range_display">初期値</span></p>
+                                    <div class="range mb-2">
+                                        <input class="range_bar" type="range" id="{{ key }}" name="{{ key }}" min="0" max="100" step="1" value="{{ (result_song_info['audio_features'][key] * 100)|int }}">
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
+                        </div>
+                        <input type="submit" value="re_Search" class="btn btn-primary my-2">
+                        <input type="hidden" name="song_id" value="{{result_song_info['audio_features']['id']}}">
+                    </form>
+                {% else %}
+                    <p class="alert alert-primary" role="alert">No music was found.</p>
+                {% endif %}
             </div>
         </div>
     </div>

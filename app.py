@@ -1,36 +1,42 @@
-from flask import Flask, request, render_template, redirect
-import requests
+"""neon - パラメータ型音楽検索サイト"""
+
 import json
 import random
+import requests
+from flask import Flask, request, render_template, redirect
 from cs50 import SQL
+
 
 app = Flask(__name__)
 
+# テンプレートの変更に対するページの自動更新
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 # Spotify APIの認証情報
-client_id = ""
-client_secret = ""
-token_url = "https://accounts.spotify.com/api/token"
-search_url = "https://api.spotify.com/v1/search"
+CLIENT_ID = ""
+CLIENT_SECRET = ""
+TOKEN_URL = "https://accounts.spotify.com/api/token"
+SEARCH_URL = "https://api.spotify.com/v1/search"
 
 # データベースを開く
 db = SQL("sqlite:///votes.db")
 
-# 認証トークンを取得する関数
-def get_access_token():
 
+def get_access_token():
+    """認証トークンを取得する関数"""
     # POSTリクエストで認証トークンを取得する
-    auth_response = requests.post(token_url, {
+    auth_response = requests.post(TOKEN_URL, {
         'grant_type': 'client_credentials',
-        'client_id': client_id,
-        'client_secret': client_secret,
-    })
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+    },timeout=3.5)
 
     # JSON形式でレスポンスを取得し、トークンを返す
     auth_response_data = auth_response.json()
     return auth_response_data['access_token']
 
-# 楽曲検索を行う関数
 def search_songs(query):
+    """楽曲検索を行う関数"""
     #入力がない場合、空白文字列の場合
     if not query or not query.strip():
         return []
@@ -39,14 +45,14 @@ def search_songs(query):
     access_token = get_access_token()
 
     # GETリクエストで楽曲を検索する
-    response = requests.get(search_url, params={
+    response = requests.get(SEARCH_URL, params={
         'q': query,
         'type': 'track',
         'limit': 5,
         'market': 'JP'
     }, headers={
         'Authorization': 'Bearer ' + access_token
-    })
+    },timeout=3.5)
 
     # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
     response_data = response.json()
@@ -61,11 +67,11 @@ def search_songs(query):
 
     return songs
 
-access_token = get_access_token()
 
 # トップページ
 @app.route("/", methods=["GET", "POST"])
 def search():
+    """検索を行う"""
     # "POST"なら検索結果表示
     if request.method == "POST":
         # フォーム内容取得
@@ -86,6 +92,7 @@ def search():
 #resultに関するページなど
 @app.route('/result', methods=['GET', 'POST'])
 def index():
+    """検索結果の表示"""
     if request.method == 'POST':
         song_id = request.form['song_id']
         song_info = get_song_info(song_id)
@@ -96,9 +103,9 @@ def index():
         return render_template('result.html', song_info=song_info)
     return render_template('result.html')
 
-# 類似する音楽を表示するページ
 @app.route('/experiment', methods=['POST'])
 def experiment():
+    """類似する音楽を表示するページ"""
     # '/'から送信された'song_id'を用いて、audio_featuresを取得
     audio_features = get_audio_features(request.form.get('song_id'))
     # Spotifyからおすすめの音楽を取得
@@ -115,13 +122,40 @@ def experiment():
     # おすすめされた楽曲の情報を取得
     result_song_info = get_song_info(result_id)
     #'experiment.html'に各種情報を送信
-    return render_template('experiment.html', source_song_info=source_song_info, result_song_info=result_song_info)
+    return render_template('experiment.html',
+                           source_song_info=source_song_info, result_song_info=result_song_info)
+
+@app.route('/re_search', methods=['POST'])
+def re_search():
+    """パラメータを操作し再検索を行う"""
+    # '/'から送信された'song_id'を用いて、audio_featuresを取得
+    audio_features = get_audio_features(request.form.get('song_id'))
+    # レンジバーで変更された値に更新
+    for key in ['acousticness', 'danceability', 'energy',
+                'instrumentalness', 'liveness', 'speechiness', 'valence']:
+        audio_features[key] = float(request.form.get(key)) / 100
+        # Spotifyからおすすめの音楽を取得
+    recommendations = get_recommendations(audio_features=audio_features)['tracks']
+    # おすすめされた音楽のidを保存するする変数の初期化
+    result_id = ""
+    # 同じ曲がおすすめされた場合にそれを弾く処理
+    for rec in recommendations:
+        if check_not_the_same(request.form.get('song_id'), rec['id']):
+            result_id = rec['id']
+            break
+    # ユーザーが検索に使った楽曲の情報を取得
+    source_song_info = get_song_info(request.form.get('song_id'))
+    # おすすめされた楽曲の情報を取得
+    result_song_info = get_song_info(result_id)
+    #'experiment.html'に各種情報を送信
+    return render_template('experiment.html',
+                           source_song_info=source_song_info, result_song_info=result_song_info)
 
 #現在受け入れている条件のリスト
 SONG_TYPES = ('happy', 'sad', 'intense', 'calm')
-# ランダム検索用のページ
 @app.route("/random", methods=["POST"])
 def random_page():
+    """ランダム検索用のページ"""
     if request.method =='POST':
         #どのような条件（明るい、悲しいなど）でランダム検索を行うかを取得
         song_type = request.form.get('song_type')
@@ -131,12 +165,14 @@ def random_page():
         genre = request.form.get('genre')
 
         # おすすめの音楽を取得
-        recommendations = get_recommendations(song_type=song_type, popularity=popularity, genre=genre)
+        recommendations = get_recommendations(song_type=song_type,
+                                              popularity=popularity, genre=genre)
         # ページを表示
         return render_template('random.html', recommendations=recommendations, song_type=song_type)
 
 @app.route("/ranking", methods=['GET', 'POST'])
 def ranking():
+    """ランキングを表示するページ"""
     # ランキング上位の曲に曲情報を追加する関数
     def add_song_info(songs):
         for song in songs:
@@ -154,7 +190,9 @@ def ranking():
         calm_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'calm')
         calm_songs = add_song_info(calm_songs)
         # ページの描画
-        return render_template('ranking.html', happy_songs=happy_songs, sad_songs=sad_songs, intense_songs=intense_songs, calm_songs=calm_songs)
+        return render_template('ranking.html', happy_songs=happy_songs,
+                               sad_songs=sad_songs, intense_songs=intense_songs,
+                               calm_songs=calm_songs)
 
     elif request.method == 'POST':
         # フォームの入力内容を取得
@@ -168,7 +206,8 @@ def ranking():
         if song_type not in SONG_TYPES:
             return redirect('/ranking')
         # データベースを検索し、現在の投票数を取得
-        result = db.execute("SELECT vote_count FROM votes WHERE track_id = ? AND song_type = ?", track_id, song_type)
+        result = db.execute("SELECT vote_count FROM votes WHERE track_id = ? AND song_type = ?",
+                            track_id, song_type)
 
         # 一度も投票されていない場合、カラムを作成
         if not result:
@@ -176,16 +215,18 @@ def ranking():
         # データベースのvote_countを1加算する
         else:
             vote_count = result[0]['vote_count']
-            db.execute("UPDATE votes SET vote_count = ? WHERE track_id = ? AND song_type = ?", (vote_count + 1), track_id, song_type)
+            db.execute("UPDATE votes SET vote_count = ? WHERE track_id = ? AND song_type = ?",
+                       (vote_count + 1), track_id, song_type)
         return redirect('/ranking')
 
-#アーティストのジャンルを取得
 def get_artist_genres(artist_id):
+    """アーティストのジャンルを取得する関数"""
     url = f"https://api.spotify.com/v1/artists/{artist_id}"
+    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers,timeout=3.5)
     if response.status_code == 200:
         artist_info = json.loads(response.text)
         genres = artist_info.get('genres', [])
@@ -193,13 +234,14 @@ def get_artist_genres(artist_id):
     else:
         return []
 
-#楽曲の情報の取得
 def get_song_info(song_id):
+    """楽曲情報を取得する関数"""
     url = f"https://api.spotify.com/v1/tracks/{song_id}"
+    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers,timeout=3.5)
     if response.status_code == 200:
         song_info = json.loads(response.text)
         # アーティスト情報からジャンル情報を取得して曲情報に追加する
@@ -214,37 +256,40 @@ def get_song_info(song_id):
     else:
         return None
 
-#オーディオフィーチャーの取得
+
 def get_audio_features(song_id):
+    """楽曲パラメータ(audio_features)取得関数"""
     url = f"https://api.spotify.com/v1/audio-features/{song_id}"
+    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers,timeout=3.5)
     if response.status_code == 200:
         audio_features = json.loads(response.text)
         return audio_features
     else:
         return None
 
-#現在利用できるジャンルを取得する関数
 #ジャンルのリストが返り値です
 def get_genres():
+    """現在利用できるジャンルを取得する関数"""
     url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
+    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers,timeout=3.5)
     if response.status_code == 200:
         return response.json()['genres']
     else:
         return None
 
-# Spotify API Recommendation パラメータ設定関数
 # audio_featuresの値をターゲットの値に設定する
 # keyは'acousticness'など
 # gapとの和と差の範囲を最大値、最小値として設定する
 def return_ranged_dict(audio_features, key, gap):
+    """Spotify API Recommendation パラメータ設定関数"""
     targets = {}
     targets['target_' + key] = audio_features[key]
 
@@ -264,13 +309,14 @@ def return_ranged_dict(audio_features, key, gap):
     return targets
 
 
-# 各種データをもとに、おすすめの音楽をSpotifyから取得する関数
 # 引数にAudio_featuresを渡す場合
 #    get_recommendations(audio_features=(audio_featuresの結果が格納されている変数など))
 # 引数にsong_typeを渡す場合
 #    get_recommendations(song_type=(SONG_TYPESの要素のうち一つ), (popularity=(1 ~ 100)), genre=(ジャンル名))
 def get_recommendations(**kwargs):
+    """各種データをもとに、おすすめの音楽をSpotifyから取得する関数"""
     recommendations_url = 'https://api.spotify.com/v1/recommendations'
+    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -292,7 +338,7 @@ def get_recommendations(**kwargs):
         }
         # min_, max_, target_ から始まる検索条件を一括指定
         targets.update(return_ranged_dict(audio_features, 'acousticness', gap))
-        # targets.update(return_ranged_dict(audio_features, 'danceability', gap))
+        targets.update(return_ranged_dict(audio_features, 'danceability', gap))
         targets.update(return_ranged_dict(audio_features, 'energy', gap))
         targets.update(return_ranged_dict(audio_features, 'instrumentalness', gap))
         targets.update(return_ranged_dict(audio_features, 'liveness', gap))
@@ -320,7 +366,7 @@ def get_recommendations(**kwargs):
             genre = 'j-pop'
 
         # 人気度がキーワード引数として渡されていればそれを適用する
-        if kwargs.get('popularity') != None:
+        if kwargs.get('popularity') is not None:
             targets['target_popularity'] = kwargs.get('popularity')
 
         # 検索条件の設定
@@ -346,7 +392,7 @@ def get_recommendations(**kwargs):
         return None
 
     # GETリクエストでおすすめの楽曲を取得する
-    response = requests.get(recommendations_url, params=targets, headers=headers)
+    response = requests.get(recommendations_url, params=targets, headers=headers,timeout=3.5)
 
     # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
     if response.status_code == 200:
@@ -354,8 +400,8 @@ def get_recommendations(**kwargs):
     else:
         return None
 
-# idやそれに紐づいた名前を比較して、同じ曲じゃなければTrueを返す
 def check_not_the_same(source_id, result_id):
+    """idやそれに紐づいた名前を比較して、同じ曲じゃなければTrueを返す"""
     if source_id == result_id:
         return False
     elif get_song_info(source_id)['name'] == get_song_info(result_id)['name']:
