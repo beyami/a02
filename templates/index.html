@@ -5,46 +5,63 @@
 {% endblock %}
 
 {% block content%}
-    <div class="border border-1 rounded-3 p-2">
-        <h3>Song Search</h3>
-        <form method="POST" action="/">
-            <label for="song_name" class="form-label">Song Name</label>
-            <input type="text" name="song_name" id="song_name" class="form-control" autofocus autocomplete="off">
-            <input type="submit" value="Search" class="btn btn-primary my-2">
-        </form>
-    </div>
-    <div>
-        <div class="d-flex flex-column border border-1 rounded-3 p-2 mt-4">
-            <h3>Random Search</h3>
-            <form method="POST" action="/random">
-                <div class="w-50 mt-2">
-                    <div>
-                        <label for="popularity" class="form-label">Popularity</label>
-                        <div class="d-flex">
-                            <span>Low</span>
-                            <input type="range" class="form-range mx-2" name="popularity" id="popularity" min="0" max="100" value="100" step="5">
-                            <span>High</span>
-                        </div>
-                    </div>
-                    <label for="genre" class="form-label">Genres</label>
-                    <select class="form-select mb-1" name="genre" size="10" aria-label="size 3 select example">
-                        {% for genre in genres %}
-                            <option value={{ genre }}>{{ genre }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="container">
-                        <div class="row">
-                            <button name="song_type" value="happy" class="btn btn-light col m-1">Give me some happy songs!</button>
-                            <button name="song_type" value="sad" class="btn btn-dark col m-1">Give me some sad songs!</button>
-                        </div>
-                        <div class="row">
-                            <button name="song_type" value="intense" class="btn btn-danger col m-1">Give me some intense songs!</button>
-                            <button name="song_type" value="calm" class="btn btn-info col m-1">Give me some calm songs!</button>
-                        </div>
+    <div class="row">
+        <div class="col-12 col-xl-9 mx-auto">
+            <div class="mt-2 p-2 border rounded">
+                <h3>Song Search</h3>
+                <div class="row">
+                    <div class="col-12 col-xl-9 mx-auto">
+                        <form method="POST" action="/">
+                            <label for="song_name" class="form-label">Song Name</label>
+                            <input type="text" name="song_name" id="song_name" class="form-control" autofocus autocomplete="off">
+                            <input type="submit" value="Search" class="btn btn-primary my-2">
+                        </form>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-12 col-xl-9 mx-auto">
+            <div class="mt-2 p-2 border rounded">
+                <div class="row">
+                    <div class="col">
+                        <h3>Random Search</h3>
+                    </div>
+                    <form method="POST" action="/random">
+                        <div class="col-12 col-xl-8 mx-auto">
+                            <label for="popularity" class="form-label">Popularity</label>
+                            <div class="d-flex">
+                                <span>Low</span>
+                                <input type="range" class="form-range mx-2" name="popularity" id="popularity" min="0" max="100" value="100" step="5">
+                                <span>High</span>
+                            </div>
+                            <label for="genre" class="form-label">Genres</label>
+                            <select class="form-select mb-1" name="genre" size="10" aria-label="size 3 select example">
+                                {% for genre in genres %}
+                                    <option value={{ genre }}>{{ genre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6 col-xl-3">
+                                        <button name="song_type" value="happy" class="btn btn-light m-1">Give me some happy songs!</button>
+                                    </div>
+                                    <div class="col-6 col-xl-3">
+                                        <button name="song_type" value="sad" class="btn btn-dark m-1">Give me some sad songs!</button>
+                                    </div>
+                                    <div class="col-6 col-xl-3">
+                                        <button name="song_type" value="intense" class="btn btn-danger m-1">Give me some intense songs!</button>
+                                    </div>
+                                    <div class="col-6 col-xl-3">
+                                        <button name="song_type" value="calm" class="btn btn-info m-1">Give me some calm songs!</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
