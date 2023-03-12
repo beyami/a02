@@ -35,7 +35,7 @@ def get_access_token():
     auth_response_data = auth_response.json()
     return auth_response_data['access_token']
 
-def search_songs(query):
+def search_songs(query, limit=5):
     """楽曲検索を行う関数"""
     #入力がない場合、空白文字列の場合
     if not query or not query.strip():
@@ -48,7 +48,7 @@ def search_songs(query):
     response = requests.get(SEARCH_URL, params={
         'q': query,
         'type': 'track',
-        'limit': 5,
+        'limit': limit,
         'market': 'JP'
     }, headers={
         'Authorization': 'Bearer ' + access_token
@@ -81,8 +81,8 @@ def search():
         if song_name is None:
             song_name = ''
 
-        # 検索結果を取得
-        songs = search_songs(song_name)
+        # 12件の検索結果を取得
+        songs = search_songs(song_name, 12)
 
         return render_template('suggest.html', songs=songs)
     else:
@@ -157,11 +157,11 @@ SONG_TYPES = ('happy', 'sad', 'intense', 'calm')
 def random_page():
     """ランダム検索用のページ"""
     if request.method =='POST':
-        #どのような条件（明るい、悲しいなど）でランダム検索を行うかを取得
+        # どのような条件（明るい、悲しいなど）でランダム検索を行うかを取得
         song_type = request.form.get('song_type')
-        #ランダム検索する楽曲の人気度
+        # ランダム検索する楽曲の人気度
         popularity = request.form.get('popularity')
-        #ランダム検索する楽曲のジャンル
+        # ランダム検索する楽曲のジャンル
         genre = request.form.get('genre')
 
         # おすすめの音楽を取得
