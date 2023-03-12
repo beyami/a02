@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block content%}
-    <div class="container">
-        <div class="row">
-            <div class="col w-50">
+    <div class="row">
+        <div class="col-12 col-xl-6">
+            <div class="m-2 p-2 border rounded">
                 <h2>Happy</h2>
-                <table class="table">
+                <table class="table table">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -21,16 +21,18 @@
                     <tbody>
                         {% for happy_song in happy_songs %}
                             <tr>
-                                <th scope="row" class="fs-4">{{ loop.index }}</th>
-                                <td class="fs-4">{{ happy_song['name'] }}</td>
-                                <td class="fs-4">{{ happy_song['vote_count'] }}</td>
-                                <td><a href={{ happy_song['external_urls']['spotify'] }} class="btn btn-primary">Listen!</a></td>
+                                <th scope="row" class="">{{ loop.index }}</th>
+                                <td class="">{{ happy_song['name'] }}</td>
+                                <td class="">{{ happy_song['vote_count'] }}</td>
+                                <td><a href={{ happy_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="col w-50">
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="m-2 p-2 border rounded">
                 <h2>Sad</h2>
                 <table class="table">
                     <thead>
@@ -44,18 +46,20 @@
                     <tbody>
                         {% for sad_song in sad_songs %}
                             <tr>
-                                <th scope="row" class="fs-4">{{ loop.index }}</th>
-                                <td class="fs-4">{{ sad_song['name'] }}</td>
-                                <td class="fs-4">{{ sad_song['vote_count'] }}</td>
-                                <td><a href={{ sad_song['external_urls']['spotify'] }} class="btn btn-primary">Listen!</a></td>
+                                <th scope="row" class="">{{ loop.index }}</th>
+                                <td class="">{{ sad_song['name'] }}</td>
+                                <td class="">{{ sad_song['vote_count'] }}</td>
+                                <td><a href={{ sad_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="row">
-            <div class="col w-50">
+    </div>
+    <div class="row">
+        <div class="col-12 col-xl-6">
+            <div class="m-2 p-2 border rounded">
                 <h2>Intense</h2>
                 <table class="table">
                     <thead>
@@ -69,16 +73,18 @@
                     <tbody>
                         {% for intense_song in intense_songs %}
                             <tr>
-                                <th scope="row" class="fs-4">{{ loop.index }}</th>
-                                <td class="fs-4">{{ intense_song['name'] }}</td>
-                                <td class="fs-4">{{ intense_song['vote_count'] }}</td>
-                                <td><a href={{ intense_song['external_urls']['spotify'] }} class="btn btn-primary">Listen!</a></td>
+                                <th scope="row" class="">{{ loop.index }}</th>
+                                <td class="">{{ intense_song['name'] }}</td>
+                                <td class="">{{ intense_song['vote_count'] }}</td>
+                                <td><a href={{ intense_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="col w-50">
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="m-2 p-2 border rounded">
                 <h2>Calm</h2>
                 <table class="table">
                     <thead>
@@ -92,16 +98,16 @@
                     <tbody>
                         {% for calm_song in calm_songs %}
                             <tr>
-                                <th scope="row" class="fs-4">{{ loop.index }}</th>
-                                <td class="fs-4">{{ calm_song['name'] }}</td>
-                                <td class="fs-4">{{ calm_song['vote_count'] }}</td>
-                                <td><a href={{ calm_song['external_urls']['spotify'] }} class="btn btn-primary">Listen!</a></td>
+                                <th scope="row" class="">{{ loop.index }}</th>
+                                <td class="">{{ calm_song['name'] }}</td>
+                                <td class="">{{ calm_song['vote_count'] }}</td>
+                                <td><a href={{ calm_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-        <a href="/" class="btn btn-secondary">Return</a>
     </div>
+    <a href="/" class="btn btn-secondary mb-2 ms-2">Return</a>
 {% endblock %}
