@@ -6,7 +6,6 @@ import requests
 from flask import Flask, request, render_template, redirect
 from cs50 import SQL
 
-
 app = Flask(__name__)
 
 # テンプレートの変更に対するページの自動更新
@@ -20,7 +19,6 @@ SEARCH_URL = "https://api.spotify.com/v1/search"
 
 # データベースを開く
 db = SQL("sqlite:///votes.db")
-
 
 def get_access_token():
     """認証トークンを取得する関数"""
@@ -37,9 +35,6 @@ def get_access_token():
 
 def search_songs(query=None, limit=5, genre=None):
     """楽曲検索を行う関数"""
-    # 認証トークンを取得
-    access_token = get_access_token()
-
     # GETリクエストで楽曲を検索する
     # ジャンルが指定されていれば、ジャンル検索
     if genre:
@@ -78,6 +73,11 @@ def search_songs(query=None, limit=5, genre=None):
 
     return songs
 
+
+'''
+認証トークンの取得
+'''
+access_token = get_access_token()
 
 # トップページ
 @app.route("/", methods=["GET", "POST"])
@@ -242,7 +242,6 @@ def ranking():
 def get_artist_genres(artist_id):
     """アーティストのジャンルを取得する関数"""
     url = f"https://api.spotify.com/v1/artists/{artist_id}"
-    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -257,7 +256,6 @@ def get_artist_genres(artist_id):
 def get_song_info(song_id):
     """楽曲情報を取得する関数"""
     url = f"https://api.spotify.com/v1/tracks/{song_id}"
-    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -280,7 +278,6 @@ def get_song_info(song_id):
 def get_audio_features(song_id):
     """楽曲パラメータ(audio_features)取得関数"""
     url = f"https://api.spotify.com/v1/audio-features/{song_id}"
-    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -295,7 +292,6 @@ def get_audio_features(song_id):
 def get_genres():
     """現在利用できるジャンルを取得する関数"""
     url = 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
-    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -336,7 +332,6 @@ def return_ranged_dict(audio_features, key, gap):
 def get_recommendations(**kwargs):
     """各種データをもとに、おすすめの音楽をSpotifyから取得する関数"""
     recommendations_url = 'https://api.spotify.com/v1/recommendations'
-    access_token = get_access_token()
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
