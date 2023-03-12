@@ -392,7 +392,7 @@ def get_recommendations(**kwargs):
         targets['seed_tracks'] = seed_tracks
         targets['target_popularity'] = popularity
         targets['seed_genres'] = genre
-        targets['limit'] = 5
+        targets['limit'] = 6
 
         # 検索したい曲の特性によって、検索条件を変える
         if song_type == 'happy':
