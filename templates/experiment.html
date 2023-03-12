@@ -49,27 +49,26 @@
                             </ul>
                         </div>
                     </div>
-                    <form method="POST" action="/re_search" >
-                        <div class="w-25 mx-1">
+                    <div class="w-50 mx-1">
+                        <form method="POST" action="/re_search" >
                             {% for key in result_song_info['audio_features'].keys() %}
                                 {% if key in ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'speechiness', 'valence'] %}
                                     <p>{{ key }}: <span class="range_display">初期値</span></p>
                                     <div class="range mb-2">
-                                        <input class="range_bar" type="range" id="{{ key }}" name="{{ key }}" min="0" max="100" step="1" value="{{ (result_song_info['audio_features'][key] * 100)|int }}">
+                                        <input class="range_bar form-range" type="range" id="{{ key }}" name="{{ key }}" min="0" max="100" step="1" value="{{ (result_song_info['audio_features'][key] * 100)|int }}">
                                     </div>
                                 {% endif %}
                             {% endfor %}
-                            
                             <a href={{ result_song_info['external_urls']['spotify'] }} target="_blank" class="btn btn-primary mt-2">Listen on Spotify</a>
-                        </div>
-                        <input type="submit" value="re_Search" class="btn btn-primary my-2">
-                        <input type="hidden" name="song_id" value="{{result_song_info['audio_features']['id']}}">
-                    </form>
+                            <input type="submit" value="re_Search" class="btn btn-primary mt-2">
+                            <input type="hidden" name="song_id" value="{{result_song_info['audio_features']['id']}}">
+                        </form>
+                    </div>
                 {% else %}
                     <p class="alert alert-primary" role="alert">No music was found.</p>
                 {% endif %}
             </div>
         </div>
     </div>
-    <a href="/" class="btn btn-secondary ms-1 mt-2">Return</a>
+    <a href="/" class="btn btn-secondary ms-1 my-2">Return</a>
 {% endblock %}
