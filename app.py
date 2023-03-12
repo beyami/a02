@@ -35,24 +35,35 @@ def get_access_token():
     auth_response_data = auth_response.json()
     return auth_response_data['access_token']
 
-def search_songs(query, limit=5):
+def search_songs(query=None, limit=5, genre=None):
     """楽曲検索を行う関数"""
-    #入力がない場合、空白文字列の場合
-    if not query or not query.strip():
-        return []
-
     # 認証トークンを取得
     access_token = get_access_token()
 
     # GETリクエストで楽曲を検索する
-    response = requests.get(SEARCH_URL, params={
-        'q': query,
-        'type': 'track',
-        'limit': limit,
-        'market': 'JP'
-    }, headers={
-        'Authorization': 'Bearer ' + access_token
-    },timeout=3.5)
+    # ジャンルが指定されていれば、ジャンル検索
+    if genre:
+        response = requests.get(SEARCH_URL, params={
+            'q': "genre:" + genre,
+            'type': 'track',
+            'limit': limit,
+            'market': 'JP'
+        }, headers={
+            'Authorization': 'Bearer ' + access_token
+        },timeout=3.5)
+    # ジャンルが指定されておらず、かつqが空白の場合のエラー処理
+    elif not query or not query.strip():
+        return []
+    # ジャンルが指定されておらず、qが空白でない場合
+    else:
+        response = requests.get(SEARCH_URL, params={
+                'q': query,
+                'type': 'track',
+                'limit': limit,
+                'market': 'JP'
+            }, headers={
+                'Authorization': 'Bearer ' + access_token
+            },timeout=3.5)
 
     # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
     response_data = response.json()
@@ -163,10 +174,19 @@ def random_page():
         popularity = request.form.get('popularity')
         # ランダム検索する楽曲のジャンル
         genre = request.form.get('genre')
+        # ジャンル別でおすすめの音楽を取得
+        songs = search_songs(limit=50, genre=genre)
+        # ランダムで音楽を1件サンプリング
+        if songs:
+            seed_tracks = random.sample(songs, 1)[0]['id']
+        else:
+            seed_tracks=""
 
-        # おすすめの音楽を取得
+        # 2件以上サンプリングする場合に実行するコード
+        # seed_tracks = ",".join([song['id'] for song in songs])
+
         recommendations = get_recommendations(song_type=song_type,
-                                              popularity=popularity, genre=genre)
+                                              popularity=popularity, genre=genre, seed_tracks=seed_tracks)
         # ページを表示
         return render_template('random.html', recommendations=recommendations, song_type=song_type)
 
@@ -348,6 +368,7 @@ def get_recommendations(**kwargs):
         song_type = kwargs.get('song_type')
         popularity = kwargs.get('popularity')
         genre = kwargs.get('genre')
+        seed_tracks = kwargs.get('seed_tracks')
 
         # エラー処理
         if song_type not in SONG_TYPES:
@@ -365,11 +386,15 @@ def get_recommendations(**kwargs):
         if genre not in get_genres():
             genre = 'j-pop'
 
+        if not seed_tracks:
+            return None
+
         # 人気度がキーワード引数として渡されていればそれを適用する
         if kwargs.get('popularity') is not None:
             targets['target_popularity'] = kwargs.get('popularity')
 
         # 検索条件の設定
+        targets['seed_tracks'] = seed_tracks
         targets['target_popularity'] = popularity
         targets['seed_genres'] = genre
         targets['limit'] = 5
