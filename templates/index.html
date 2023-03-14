@@ -7,14 +7,14 @@
 {% block content%}
     <div class="row">
         <div class="col-12 col-xl-9 mx-auto">
-            <div class="mt-2 p-2 border rounded">
-                <h3>Song Search</h3>
+            <div class="mt-2 p-2 border border-light rounded">
+                <h3 class="">Song Search</h3>
                 <div class="row">
                     <div class="col-12 col-xl-9 mx-auto">
                         <form method="POST" action="/">
                             <label for="song_name" class="form-label">Song Name</label>
                             <input type="text" name="song_name" id="song_name" class="form-control" autofocus autocomplete="off">
-                            <input type="submit" value="Search" class="btn btn-primary my-2">
+                            <input type="submit" value="Search" class="btn btn-success my-2">
                         </form>
                     </div>
                 </div>
@@ -23,10 +23,10 @@
     </div>
     <div class="row">
         <div class="col-12 col-xl-9 mx-auto">
-            <div class="mt-2 p-2 border rounded">
+            <div class="mt-2 p-2 border border-light rounded">
                 <div class="row">
                     <div class="col">
-                        <h3>Random Search</h3>
+                        <h3 class="">Random Search</h3>
                     </div>
                     <form method="POST" action="/random">
                         <div class="col-12 col-xl-8 mx-auto">
@@ -54,7 +54,7 @@
                                         <button name="song_type" value="intense" class="btn btn-danger m-1">Give me some intense songs!</button>
                                     </div>
                                     <div class="col-6 col-xl-3">
-                                        <button name="song_type" value="calm" class="btn btn-info m-1">Give me some calm songs!</button>
+                                        <button name="song_type" value="calm" class="btn btn-primary m-1">Give me some calm songs!</button>
                                     </div>
                                 </div>
                             </div>

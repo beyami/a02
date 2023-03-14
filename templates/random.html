@@ -9,21 +9,21 @@
         <div class="row">
             {% for rec in recommendations['tracks'] %}
                 <div class="col-6 col-xl-2">
-                    <div class="card mt-2">
+                    <div class="card bg-dark mt-2">
                         <img src={{ rec['album']['images'][0]['url'] }} width="200" class="card-img-top">
                         <div class="card-body">
                             <h5 class="card-title">{{ rec['name'] }}</h5>
-                            <div class="card-header mt-1">
+                            <div class="card-header bg-success mt-1">
                                 Artists
                             </div>
                             <ul class="list-group list-group-flush">
                                 {% for artist in rec['artists'] %}
-                                    <li class="list-group-item">{{ artist['name'] }}</li>
+                                    <li class="list-group-item bg-light">{{ artist['name'] }}</li>
                                 {% endfor %}
                             </ul>
                         </div>
                     </div>
-                    <a href={{ rec['external_urls']['spotify'] }} class="btn btn-primary mt-2 mb-3" target="_blank">Listen on Spotify</a>
+                    <a href={{ rec['external_urls']['spotify'] }} class="btn btn-success mt-2 mb-3" target="_blank">Listen on Spotify</a>
                 </div>
             {% endfor %}
         </div>
@@ -44,5 +44,5 @@
     {% else %}
         <p class="alert alert-primary m-2" role="alert">No music was found.</p>
     {% endif %}
-    <a href='/' class="btn btn-secondary my-2" >Return</a>
+    <a href='/' class="btn btn-light my-2" >Return</a>
 {% endblock %}

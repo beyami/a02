@@ -5,20 +5,20 @@
 {% endblock %}
 {% block content%}
     {% if song_info %}
-      <div class="card">
+      <div class="card bg-dark">
         <img src="{{ song_info['album']['images'][0]['url'] }}" alt="{{ song_info['album']['name'] }} album art" width="200px" class="mt-1 ms-1">
         <div class="card-body">
           <h5 class="card-title">{{ song_info['name'] }}</h5>
           <ul class="list-group">
-            <li class="list-group-item active">Artists</li>
+            <li class="list-group-item bg-success">Artists</li>
             {% for artist in song_info['artists'] %}
-              <li class="list-group-item">{{ artist['name'] }}</li>
+              <li class="list-group-item bg-light">{{ artist['name'] }}</li>
             {% endfor %}
           </ul>
         </div>
       </div>
 
-      <table class="table table-bordered mt-2">
+      <table class="table table-bordered text-light mt-2">
         <tr>
           <td>Genre:</td>
           <td>{{ song_info['genres'] }}</td>
@@ -87,6 +87,6 @@
         {% endif %}
       </table>
     {% endif %}
-    <a href="/" class="btn btn-secondary">Return</a>
+    <a href="/" class="btn btn-light">Return</a>
 {% endblock %}
 

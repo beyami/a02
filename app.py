@@ -74,9 +74,7 @@ def search_songs(query=None, limit=5, genre=None):
     return songs
 
 
-'''
-認証トークンの取得
-'''
+'''認証トークンの取得'''
 access_token = get_access_token()
 
 # トップページ
@@ -176,14 +174,17 @@ def random_page():
         genre = request.form.get('genre')
         # ジャンル別でおすすめの音楽を取得
         songs = search_songs(limit=50, genre=genre)
-        # ランダムで音楽を1件サンプリング
-        if songs:
+        # ランダムで音楽を'sample_number'件サンプリング
+        sampling_number = 2
+        if len(songs) >= sampling_number:
+            # 2件以上サンプルする際のコード
+            songs = random.sample(songs, sampling_number)
+            seed_tracks = ",".join([song['id'] for song in songs])
+        elif songs:
+            # 検索結果の件数が'sampling_number'に満たない場合一件のみサンプル
             seed_tracks = random.sample(songs, 1)[0]['id']
         else:
             seed_tracks=""
-
-        # 2件以上サンプリングする場合に実行するコード
-        # seed_tracks = ",".join([song['id'] for song in songs])
 
         recommendations = get_recommendations(song_type=song_type,
                                               popularity=popularity, genre=genre, seed_tracks=seed_tracks)

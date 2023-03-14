@@ -5,15 +5,18 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" href="../static/css/style.css">
     </head>
-    <section class="content">
-        <nav class="navbar navbar-expand navbar-light bg-light">
+    <section class="content text-light" id="base-content">
+        <nav class="navbar navbar-expand navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">neon</a>
+                <a class="navbar-brand" href="/">
+                    <img class="navbar-brand" src="../static/logo.png" width="100" height="50">
+                </a>
                 <div class="collapse navbar-collapse">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <span class="navbar-text">{% block header %}{% endblock %}</span>
+                            <span class="navbar-text text-light">{% block header %}{% endblock %}</span>
                         </li>
                     </ul>
                 </div>

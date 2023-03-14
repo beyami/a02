@@ -9,7 +9,7 @@
         <div class="col-12 col-xl-6">
             <div class="m-2 p-2 border rounded">
                 <h2>Happy</h2>
-                <table class="table table">
+                <table class="table text-light">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -24,7 +24,7 @@
                                 <th scope="row" class="">{{ loop.index }}</th>
                                 <td class="">{{ happy_song['name'] }}</td>
                                 <td class="">{{ happy_song['vote_count'] }}</td>
-                                <td><a href={{ happy_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
+                                <td><a href={{ happy_song['external_urls']['spotify'] }} class="btn btn-success" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -34,7 +34,7 @@
         <div class="col-12 col-xl-6">
             <div class="m-2 p-2 border rounded">
                 <h2>Sad</h2>
-                <table class="table">
+                <table class="table text-light">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -49,7 +49,7 @@
                                 <th scope="row" class="">{{ loop.index }}</th>
                                 <td class="">{{ sad_song['name'] }}</td>
                                 <td class="">{{ sad_song['vote_count'] }}</td>
-                                <td><a href={{ sad_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
+                                <td><a href={{ sad_song['external_urls']['spotify'] }} class="btn btn-success" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -61,7 +61,7 @@
         <div class="col-12 col-xl-6">
             <div class="m-2 p-2 border rounded">
                 <h2>Intense</h2>
-                <table class="table">
+                <table class="table text-light">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -76,7 +76,7 @@
                                 <th scope="row" class="">{{ loop.index }}</th>
                                 <td class="">{{ intense_song['name'] }}</td>
                                 <td class="">{{ intense_song['vote_count'] }}</td>
-                                <td><a href={{ intense_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
+                                <td><a href={{ intense_song['external_urls']['spotify'] }} class="btn btn-success" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -86,7 +86,7 @@
         <div class="col-12 col-xl-6">
             <div class="m-2 p-2 border rounded">
                 <h2>Calm</h2>
-                <table class="table">
+                <table class="table text-light">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -101,7 +101,7 @@
                                 <th scope="row" class="">{{ loop.index }}</th>
                                 <td class="">{{ calm_song['name'] }}</td>
                                 <td class="">{{ calm_song['vote_count'] }}</td>
-                                <td><a href={{ calm_song['external_urls']['spotify'] }} class="btn btn-primary" target="_blank">Listen!</a></td>
+                                <td><a href={{ calm_song['external_urls']['spotify'] }} class="btn btn-success" target="_blank">Listen!</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -109,5 +109,5 @@
             </div>
         </div>
     </div>
-    <a href="/" class="btn btn-secondary mb-2 ms-2">Return</a>
+    <a href="/" class="btn btn-light mb-2 ms-2">Return</a>
 {% endblock %}
