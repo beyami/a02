@@ -122,7 +122,7 @@ def experiment():
     # '/'から送信された'song_id'を用いて、audio_featuresを取得
     audio_features = get_audio_features(request.form.get('song_id'))
     # Spotifyからおすすめの音楽を取得
-    recommendations = get_recommendations(audio_features=audio_features)['tracks']
+    recommendations = get_recommendations(type='audio_features', audio_features=audio_features)['tracks']
     # おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
     # 同じ曲がおすすめされた場合にそれを弾く処理
@@ -148,7 +148,7 @@ def re_search():
                 'instrumentalness', 'liveness', 'speechiness', 'valence']:
         audio_features[key] = float(request.form.get(key)) / 100
         # Spotifyからおすすめの音楽を取得
-    recommendations = get_recommendations(audio_features=audio_features)['tracks']
+    recommendations = get_recommendations(type='audio_features', audio_features=audio_features)['tracks']
     # おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
     # 同じ曲がおすすめされた場合にそれを弾く処理
@@ -190,7 +190,7 @@ def random_page():
         else:
             seed_tracks=""
 
-        recommendations = get_recommendations(song_type=song_type,
+        recommendations = get_recommendations(type='random', song_type=song_type,
                                               popularity=popularity, genre=genre, seed_tracks=seed_tracks)
         # ページを表示
         return render_template('random.html', recommendations=recommendations, song_type=song_type)
@@ -206,13 +206,13 @@ def ranking():
 
     if request.method == 'GET':
         # 投票数上位10曲を取得し、曲情報を追加
-        happy_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'happy')
+        happy_songs = db.execute('SELECT * FROM votes WHERE song_type = ? ORDER BY vote_count DESC LIMIT 10', 'happy')
         happy_songs = add_song_info(happy_songs)
-        sad_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'sad')
+        sad_songs = db.execute('SELECT * FROM votes WHERE song_type = ? ORDER BY vote_count DESC LIMIT 10', 'sad')
         sad_songs = add_song_info(sad_songs)
-        intense_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'intense')
+        intense_songs = db.execute('SELECT * FROM votes WHERE song_type = ? ORDER BY vote_count DESC LIMIT 10', 'intense')
         intense_songs = add_song_info(intense_songs)
-        calm_songs = db.execute('SELECT * FROM votes WHERE song_type = ? LIMIT 10', 'calm')
+        calm_songs = db.execute('SELECT * FROM votes WHERE song_type = ? ORDER BY vote_count DESC LIMIT 10', 'calm')
         calm_songs = add_song_info(calm_songs)
         # ページの描画
         return render_template('ranking.html', happy_songs=happy_songs,
@@ -306,35 +306,39 @@ def get_genres():
     else:
         return None
 
-# audio_featuresの値をターゲットの値に設定する
-# keyは'acousticness'など
-# gapとの和と差の範囲を最大値、最小値として設定する
-def return_ranged_dict(audio_features, key, gap):
-    """Spotify API Recommendation パラメータ設定関数"""
-    targets = {}
-    targets['target_' + key] = audio_features[key]
 
-    # 値が0より小さい場合は0に設定
-    # それ以外の場合はgapとaudio_featuresの差
-    if audio_features[key] - gap > 0:
-        targets['min_' + key] = audio_features[key] - gap
-    else:
-        targets['min_' + key] = 0
+# 指定された parameters ± gap の範囲を検索ターゲットの辞書として返す関数
+# Spotify API の recommendations関数で使う
+def set_parameters(audio_features, parameters, gap):
+    def set_range(audio_features, key, gap):
+        """Spotify API Recommendation パラメータ範囲設定関数"""
+        targets = {}
+        targets['target_' + key] = audio_features[key]
 
-    # 上と同様の処理を最大値の設定にも行う
-    if audio_features[key] - gap < 1:
-        targets['max_' + key] = audio_features[key] + gap
-    else:
-        targets['min_' + key] = 1
+        # 値が0より小さい場合は0に設定
+        # それ以外の場合はgapとaudio_featuresの差
+        if audio_features[key] - gap > 0:
+            targets['min_' + key] = audio_features[key] - gap
+        else:
+            targets['min_' + key] = 0
 
-    return targets
+        # 上と同様の処理を最大値の設定にも行う
+        if audio_features[key] - gap < 1:
+            targets['max_' + key] = audio_features[key] + gap
+        else:
+            targets['min_' + key] = 1
+        return targets
 
+    result = {}
+    for parameter in parameters:
+        result.update(set_range(audio_features, parameter, gap))
+    return result
 
 # 引数にAudio_featuresを渡す場合
-#    get_recommendations(audio_features=(audio_featuresの結果が格納されている変数など))
+#    get_recommendations(type='audio_features', query=(audio_featuresの値が入った辞書))
 # 引数にsong_typeを渡す場合
-#    get_recommendations(song_type=(SONG_TYPESの要素のうち一つ), (popularity=(1 ~ 100)), genre=(ジャンル名))
-def get_recommendations(**kwargs):
+#    get_recommendations(type='random', song_type=(SONG_TYPESの要素のうち一つ), (popularity=(1 ~ 100)), genre=(ジャンル名), seed_tracks=())
+def get_recommendations(type=None, **kwargs):
     """各種データをもとに、おすすめの音楽をSpotifyから取得する関数"""
     recommendations_url = 'https://api.spotify.com/v1/recommendations'
     headers = {
@@ -345,26 +349,23 @@ def get_recommendations(**kwargs):
         'market':                   'JP',
         'limit':                    10,
     }
-
     # audio_featuresが渡されている場合に実行される文
-    if kwargs.get('audio_features'):
+    if type == 'audio_features':
         audio_features = kwargs.get('audio_features')
         # 検索パラメータ
         gap = 0.05
         targets = {
-            'seed_tracks':              audio_features.get('id'),
-            'target_key':               audio_features.get('key'),
-            'target_mode':              audio_features.get('mode')
+            'seed_tracks': audio_features.get('id'),
+             'target_key': audio_features.get('key'),
+            'target_mode': audio_features.get('mode')
         }
         # min_, max_, target_ から始まる検索条件を一括指定
-        targets.update(return_ranged_dict(audio_features, 'acousticness', gap))
-        targets.update(return_ranged_dict(audio_features, 'danceability', gap))
-        targets.update(return_ranged_dict(audio_features, 'energy', gap))
-        targets.update(return_ranged_dict(audio_features, 'instrumentalness', gap))
-        targets.update(return_ranged_dict(audio_features, 'liveness', gap))
+        # 検索条件に含めたいパラメータを以下のリストに入れる
+        parameters = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness']
+        targets.update(set_parameters(audio_features, parameters, gap))
 
-    # song_typeが渡されている場合に実行される文
-    if kwargs.get('song_type'):
+    # ランダム検索を行う場合
+    elif type == 'random':
         song_type = kwargs.get('song_type')
         popularity = kwargs.get('popularity')
         genre = kwargs.get('genre')
@@ -410,6 +411,8 @@ def get_recommendations(**kwargs):
             targets['target_energy'] = random.randint(75, 100) / 100
         elif song_type == 'calm':
             targets['target_energy'] = random.randint(0, 25) / 100
+    else:
+        return None
 
     #エラー処理
     #'seed_tracks'または'seed_genres'が指定されていない場合検索が行えないため
@@ -417,7 +420,7 @@ def get_recommendations(**kwargs):
         return None
 
     # GETリクエストでおすすめの楽曲を取得する
-    response = requests.get(recommendations_url, params=targets, headers=headers,timeout=3.5)
+    response = requests.get(recommendations_url, params=targets, headers=headers, timeout=3.5)
 
     # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
     if response.status_code == 200:
