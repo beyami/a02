@@ -11,6 +11,9 @@
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="song card bg-dark mt-2">
                     <div class="card-body">
+                        {% if song['image'] %}
+                            <img src={{ song['image'] }} class="card-img-top" alt="Image of the song">
+                        {% endif %}
                         <h5 class="name card-title">{{ song.name }}</h5>
                         <h6 class="artist card-subtitle">{{ song.artist }}</h6>
                         <form method="POST" action="/result">

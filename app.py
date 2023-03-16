@@ -33,32 +33,37 @@ def get_access_token():
     auth_response_data = auth_response.json()
     return auth_response_data['access_token']
 
-def search_songs(query=None, limit=5, genre=None):
+def search_songs(type=None, query=None, limit=5):
     """楽曲検索を行う関数"""
     # GETリクエストで楽曲を検索する
-    # ジャンルが指定されていれば、ジャンル検索
-    if genre:
-        response = requests.get(SEARCH_URL, params={
-            'q': "genre:" + genre,
-            'type': 'track',
-            'limit': limit,
-            'market': 'JP'
-        }, headers={
-            'Authorization': 'Bearer ' + access_token
-        },timeout=3.5)
-    # ジャンルが指定されておらず、かつqが空白の場合のエラー処理
+    # 検索パラメータ
+    params = {'type'    :'track',
+              'limit'   :limit,
+              'market'  :'JP'}
+
+    # 引数'type'が'genre'の場合、ジャンルで検索する
+    if type.lower() == 'genre':
+        params['q'] = "genre:" + query
+    # 引数'type'が'song'の場合、曲名で検索する
+    elif type.lower() == 'song':
+        params['q'] = query
+    # 引数'query'が空白の場合の処理
     elif not query or not query.strip():
         return []
-    # ジャンルが指定されておらず、qが空白でない場合
-    else:
-        response = requests.get(SEARCH_URL, params={
-                'q': query,
-                'type': 'track',
-                'limit': limit,
-                'market': 'JP'
-            }, headers={
-                'Authorization': 'Bearer ' + access_token
-            },timeout=3.5)
+
+    # リクエストの実行
+    response = requests.get(SEARCH_URL,
+                            params=params,
+                            headers={'Authorization': 'Bearer ' + access_token},
+                            timeout=3.5)
+
+    # レスポンスからアルバム画像を取得する関数
+    # アルバム画像がなければNoneを返す
+    def get_image(track):
+        if track['album'].get('images'):
+            return track['album']['images'][0]['url']
+        else:
+            return None
 
     # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
     response_data = response.json()
@@ -69,10 +74,9 @@ def search_songs(query=None, limit=5, genre=None):
             'name': track['name'],
             'id': track['id'],
             'artist': artists,
+            'image': get_image(track)
         })
-
     return songs
-
 
 '''認証トークンの取得'''
 access_token = get_access_token()
@@ -91,7 +95,7 @@ def search():
             song_name = ''
 
         # 12件の検索結果を取得
-        songs = search_songs(song_name, 12)
+        songs = search_songs(type='song', query=song_name, limit=12)
 
         return render_template('suggest.html', songs=songs)
     else:
@@ -173,7 +177,7 @@ def random_page():
         # ランダム検索する楽曲のジャンル
         genre = request.form.get('genre')
         # ジャンル別でおすすめの音楽を取得
-        songs = search_songs(limit=50, genre=genre)
+        songs = search_songs(type='genre', query=genre, limit=50)
         # ランダムで音楽を'sample_number'件サンプリング
         sampling_number = 2
         if len(songs) >= sampling_number:
