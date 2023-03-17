@@ -122,7 +122,7 @@ def experiment():
     # '/'から送信された'song_id'を用いて、audio_featuresを取得
     audio_features = get_audio_features(request.form.get('song_id'))
     # Spotifyからおすすめの音楽を取得
-    recommendations = get_recommendations(type='audio_features', audio_features=audio_features)['tracks']
+    recommendations = get_recommendations_by_audio_features(audio_features)['tracks']
     # おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
     # 同じ曲がおすすめされた場合にそれを弾く処理
@@ -148,7 +148,7 @@ def re_search():
                 'instrumentalness', 'liveness', 'speechiness', 'valence']:
         audio_features[key] = float(request.form.get(key)) / 100
         # Spotifyからおすすめの音楽を取得
-    recommendations = get_recommendations(type='audio_features', audio_features=audio_features)['tracks']
+    recommendations = get_recommendations_by_audio_features(audio_features)['tracks']
     # おすすめされた音楽のidを保存するする変数の初期化
     result_id = ""
     # 同じ曲がおすすめされた場合にそれを弾く処理
@@ -190,8 +190,7 @@ def random_page():
         else:
             seed_tracks=""
 
-        recommendations = get_recommendations(type='random', song_type=song_type,
-                                              popularity=popularity, genre=genre, seed_tracks=seed_tracks)
+        recommendations = get_random_recommendations(song_type, popularity, genre, seed_tracks)
         # ページを表示
         return render_template('random.html', recommendations=recommendations, song_type=song_type)
 
@@ -334,90 +333,85 @@ def set_parameters(audio_features, parameters, gap):
         result.update(set_range(audio_features, parameter, gap))
     return result
 
-# 引数にAudio_featuresを渡す場合
-#    get_recommendations(type='audio_features', query=(audio_featuresの値が入った辞書))
-# 引数にsong_typeを渡す場合
-#    get_recommendations(type='random', song_type=(SONG_TYPESの要素のうち一つ), (popularity=(1 ~ 100)), genre=(ジャンル名), seed_tracks=())
-def get_recommendations(type=None, **kwargs):
-    """各種データをもとに、おすすめの音楽をSpotifyから取得する関数"""
+def get_recommendations_by_audio_features(audio_features):
+    """audio_featuresをもとに、おすすめの音楽をSpotifyから取得する関数"""
     recommendations_url = 'https://api.spotify.com/v1/recommendations'
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
+    # 検索パラメータ
     # 検索条件を指定するための辞書
     targets = {
-        'market':                   'JP',
-        'limit':                    10,
+             'market': 'JP',
+              'limit': 10,
+        'seed_tracks': audio_features.get('id'),
+         'target_key': audio_features.get('key'),
+        'target_mode': audio_features.get('mode')
     }
-    # audio_featuresが渡されている場合に実行される文
-    if type == 'audio_features':
-        audio_features = kwargs.get('audio_features')
-        # 検索パラメータ
-        gap = 0.05
-        targets = {
-            'seed_tracks': audio_features.get('id'),
-             'target_key': audio_features.get('key'),
-            'target_mode': audio_features.get('mode')
-        }
-        # min_, max_, target_ から始まる検索条件を一括指定
-        # 検索条件に含めたいパラメータを以下のリストに入れる
-        parameters = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness']
-        targets.update(set_parameters(audio_features, parameters, gap))
+    # 検索ターゲットの最小値と最大値の和と差
+    gap = 0.05
 
-    # ランダム検索を行う場合
-    elif type == 'random':
-        song_type = kwargs.get('song_type')
-        popularity = kwargs.get('popularity')
-        genre = kwargs.get('genre')
-        seed_tracks = kwargs.get('seed_tracks')
+    # min_, max_, target_ から始まる検索条件を一括指定
+    # 検索条件に含めたいパラメータを以下のリストに入れる
+    parameters = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness']
+    targets.update(set_parameters(audio_features, parameters, gap))
 
-        # エラー処理
-        if song_type not in SONG_TYPES:
-            # 不正な値の場合、デフォルト値を設定
-            song_type = 'happy'
+    # GETリクエストでおすすめの楽曲を取得する
+    response = requests.get(recommendations_url, params=targets, headers=headers, timeout=3.5)
 
-        if popularity.isdecimal():
-            popularity = int(popularity)
-        else:
-            popularity = 100
-
-        if not (0 <= popularity and popularity <= 100):
-            popularity = 100
-
-        if genre not in get_genres():
-            genre = 'j-pop'
-
-        if not seed_tracks:
-            return None
-
-        # 人気度がキーワード引数として渡されていればそれを適用する
-        if kwargs.get('popularity') is not None:
-            targets['target_popularity'] = kwargs.get('popularity')
-
-        # 検索条件の設定
-        targets['seed_tracks'] = seed_tracks
-        targets['target_popularity'] = popularity
-        targets['seed_genres'] = genre
-        targets['limit'] = 6
-
-        # 検索したい曲の特性によって、検索条件を変える
-        if song_type == 'happy':
-            # 0.75から1までの数値にランダムに設定
-            targets['target_valence'] = random.randint(75, 100) / 100
-        elif song_type == 'sad':
-            # 0から0.25までの数値にランダムに設定
-            targets['target_valence'] = random.randint(0, 25) / 100
-        elif song_type == 'intense':
-            targets['target_energy'] = random.randint(75, 100) / 100
-        elif song_type == 'calm':
-            targets['target_energy'] = random.randint(0, 25) / 100
+    # JSON形式でレスポンスを取得し、楽曲情報をリストに格納する
+    if response.status_code == 200:
+        return response.json()
     else:
         return None
 
-    #エラー処理
-    #'seed_tracks'または'seed_genres'が指定されていない場合検索が行えないため
-    if not (targets.get('seed_tracks') or targets.get('seed_genres')):
+def get_random_recommendations(song_type, popularity, genre, seed_tracks):
+    """ランダム検索用に、おすすめの音楽をSpotifyから取得する関数"""
+    recommendations_url = 'https://api.spotify.com/v1/recommendations'
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    # エラー処理
+    # 不正な値の場合、デフォルト値を設定
+    if song_type not in SONG_TYPES:
+        song_type = 'happy'
+
+    if popularity.isdecimal():
+        popularity = int(popularity)
+    else:
+        popularity = 100
+
+    if not (0 <= popularity and popularity <= 100):
+        popularity = 100
+
+    if genre not in get_genres():
+        genre = 'j-pop'
+
+    if not seed_tracks:
         return None
+
+    # 検索条件の設定
+    # 検索条件を指定するための辞書
+    targets = {
+                   'market': 'JP',
+                    'limit': 10,
+              'seed_tracks': seed_tracks,
+        'target_popularity': popularity,
+              'seed_genres': genre,
+                    'limit': 6
+    }
+
+    # 検索したい曲の特性によって、検索条件を変える
+    if song_type == 'happy':
+        # 0.75から1までの数値にランダムに設定
+        targets['target_valence'] = random.randint(75, 100) / 100
+    elif song_type == 'sad':
+        # 0から0.25までの数値にランダムに設定
+        targets['target_valence'] = random.randint(0, 25) / 100
+    elif song_type == 'intense':
+        targets['target_energy'] = random.randint(75, 100) / 100
+    elif song_type == 'calm':
+        targets['target_energy'] = random.randint(0, 25) / 100
 
     # GETリクエストでおすすめの楽曲を取得する
     response = requests.get(recommendations_url, params=targets, headers=headers, timeout=3.5)
