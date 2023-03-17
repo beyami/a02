@@ -197,10 +197,32 @@ def random_page():
 @app.route("/ranking", methods=['GET', 'POST'])
 def ranking():
     """ランキングを表示するページ"""
-    # ランキング上位の曲に曲情報を追加する関数
     def add_song_info(songs):
-        for song in songs:
-            song.update(get_song_info(song['track_id']))
+        '''データベースからそれぞれの楽曲情報を取得する関数'''
+        url = f"https://api.spotify.com/v1/tracks"
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+        ids = ",".join([song['track_id'] for song in songs])
+        params = {
+            'market': 'JP',
+            'ids': ids
+        }
+        # GETリクエストでおすすめの楽曲を取得する
+        response = requests.get(url, params=params, headers=headers, timeout=3.5)
+
+        # 正常に応答があれば、['tracks']内部の配列を保存
+        if response.status_code == 200:
+            song_infos = json.loads(response.text)['tracks']
+        else:
+            return None
+
+        # データベースから取得したランキング上位の曲に、曲情報を追加
+        index = 0
+        for song_info in song_infos:
+            if index < len(songs) and songs[index]['track_id'] == song_info['id']:
+                songs[index].update(song_info)
+            index += 1
         return songs
 
     if request.method == 'GET':
@@ -215,8 +237,9 @@ def ranking():
         calm_songs = add_song_info(calm_songs)
         # ページの描画
         return render_template('ranking.html', happy_songs=happy_songs,
-                               sad_songs=sad_songs, intense_songs=intense_songs,
-                               calm_songs=calm_songs)
+                                               sad_songs=sad_songs,
+                                               intense_songs=intense_songs,
+                                               calm_songs=calm_songs)
 
     elif request.method == 'POST':
         # フォームの入力内容を取得
